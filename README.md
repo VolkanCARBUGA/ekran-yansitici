@@ -68,6 +68,7 @@ Ekran Yansıtıcı, o tableti bilgisayarın **gerçek ana ekranı** gibi kullanm
 |---|---|---|
 | 🔌 | **USB ile tak-çalıştır** | Tablet takılınca ADB tüneli kurulur ve tablette tarayıcı kendiliğinden açılır. Bilgisayarda hiçbir şeye tıklamanız gerekmez. |
 | 📡 | **Wi-Fi** | Aynı ağdaki tablette `http://<bilgisayar-ip>:8080` adresini açmanız yeterli. |
+| 🔒 | **PIN koruması** | Wi-Fi bağlantıları 6 haneli PIN ister, 5 yanlış denemede kilitlenir. USB'de PIN sorulmaz. |
 | 🔀 | **Akıllı ana ekran** | Tablet bağlıyken ana ekran tablettir. Tablet çıkınca harici monitör ana ekran olur. Ekranların birbirine göre yerleşimi korunur. |
 | 👆 | **Dokunmatik kontrol** | Tek dokunma, çift dokunma, uzun basma (sağ tık), sürükle-bırak |
 | 🔍 | **Yakınlaştırma** | İki parmakla %100–%400 arası yakınlaştırıp kaydırma |
@@ -199,7 +200,7 @@ Belirli bir Python kullanmak için: `EKRAN_PYTHON=/yol/python3 ./OTOMATIK_BASLAT
 ## 🎮 Kullanım
 
 1. **USB:** Servis kuruluyken tableti takın. Sayfa tablette kendiliğinden açılır.
-2. **Wi-Fi:** Tablet tarayıcısında, sunucu başlarken yazdırılan `http://<IP>:8080` adresini açın.
+2. **Wi-Fi:** Tablet tarayıcısında, sunucu başlarken yazdırılan `http://<IP>:8080` adresini açın ve **PIN**'i girin. PIN bir kez girildikten sonra tablet onu hatırlar. PIN'i nasıl göreceğiniz için bkz. [Güvenlik](#%EF%B8%8F-güvenlik).
 3. **Harici monitör:** Monitör takılıyken tableti çıkarın, ana ekran yaklaşık 4 saniye içinde monitöre geçer. Tableti geri takınca tekrar tablete döner.
 
 ### Dokunmatik hareketler
@@ -212,6 +213,7 @@ Belirli bir Python kullanmak için: `EKRAN_PYTHON=/yol/python3 ./OTOMATIK_BASLAT
 | ☝️ Sürükleme | Sürükle-bırak / seçim |
 | 🤏 İki parmak | Yakınlaştırma (%100–%400) ve kaydırma |
 | ⛶ Sağ alt düğme | Tam ekran / çıkış |
+| 🔒 Sağ alt düğme (yalnızca USB) | Wi-Fi PIN'ini 10 saniye gösterir |
 
 ### Ekran senaryoları
 
@@ -225,6 +227,7 @@ Belirli bir Python kullanmak için: `EKRAN_PYTHON=/yol/python3 ./OTOMATIK_BASLAT
 
 ```bash
 python app/server.py [--port 8080] [--monitor 1] [--fps 60] [--quality 78] [--no-auto-main]
+                     [--pin 123456] [--reset-pin] [--no-pin]
 ```
 
 | Seçenek | Varsayılan | Açıklama |
@@ -234,19 +237,45 @@ python app/server.py [--port 8080] [--monitor 1] [--fps 60] [--quality 78] [--no
 | `--fps` | `60` | Hedef kare hızı |
 | `--quality` | `78` | JPEG kalitesi (1–95) |
 | `--no-auto-main` | kapalı | Ana ekranı tablete göre otomatik değiştirmeyi kapatır |
+| `--pin` | — | Wi-Fi PIN'ini bu değerle değiştirir (ayar dosyasına kaydedilmez) |
+| `--reset-pin` | — | Yeni rastgele PIN üretip kaydeder. Eski PIN ile eşleşmiş tabletler yeniden PIN ister. |
+| `--no-pin` | kapalı | PIN korumasını kapatır (**önerilmez**) |
 
 | Ortam değişkeni | Açıklama |
 |---|---|
 | `EKRAN_PYTHON` | macOS kurulumunda kullanılacak `python3` yolu |
+| `EKRAN_PIN` | `--pin` ile aynı: PIN'i ortam değişkeniyle verir |
+
+**Ayar dosyası** (PIN ve jeton anahtarı burada saklanır; servisi yeniden kurmak PIN'i değiştirmez):
+
+- macOS: `~/.config/ekran-yansitici/ayarlar.json`
+- Windows: `%APPDATA%\EkranYansitici\ayarlar.json`
 
 ## 🛡️ Güvenlik
 
-> [!WARNING]
-> Sunucu ağdaki tüm arayüzlerde **parolasız** dinler. **Aynı Wi-Fi ağındaki herkes** `http://<IP>:8080` adresini açarak ekranınızı görebilir ve fare/klavyeyi kontrol edebilir.
+Sunucu ağdaki tüm arayüzlerde dinler, bu yüzden **Wi-Fi bağlantıları PIN ile korunur**.
 
-- ✅ Yalnızca güvendiğiniz ağlarda (ev ağı gibi) Wi-Fi kullanın.
-- ✅ Halka açık ağlarda yalnızca **USB** kullanın. USB bağlantısı `127.0.0.1` üzerinden ADB tüneliyle gider.
-- ✅ Wi-Fi'ı tamamen kapatmak için güvenlik duvarında 8080 portuna dışarıdan erişimi engelleyin.
+| | USB (`127.0.0.1`, ADB tüneli) | Wi-Fi (`<IP>:8080`) |
+|---|---|---|
+| PIN sorulur mu? | Hayır. Kablo fiziksel erişim demektir. | **Evet** |
+| Doğrulanmadan görüntü / kontrol | — | **Yok**: PIN girilene kadar ne görüntü gönderilir ne de dokunma işlenir. |
+
+**PIN nasıl çalışır?**
+
+- **Oluşturulması:** İlk çalıştırmada rastgele **6 haneli** bir PIN üretilir ve [ayar dosyasına](#%EF%B8%8F-yapılandırma) kaydedilir.
+- **Hatırlanması:** Doğru PIN girilince tablete bir **jeton** verilir, tablet sonraki bağlantılarda PIN sormaz. Jeton PIN'e bağlıdır; `--reset-pin` ile PIN değişince eski jetonların hepsi geçersiz olur.
+- **Deneme kilidi:** Aynı IP'den **5 yanlış denemede** 30 saniye kilit uygulanır. Yanlışlar sürerse kilit süresi her seferinde iki katına çıkar (en çok 15 dakika).
+- **API koruması:** `/api/info` da Wi-Fi'dan jetonsuz çağrılırsa `401` döner.
+
+**Ekranım kırıkken PIN'i nasıl göreceğim?**
+
+1. Tableti **USB** ile bağlayın (PIN sorulmaz).
+2. Sağ alttaki **🔒** düğmesine dokunun. PIN 10 saniye görünür.
+3. Ayrıca sunucu başlarken PIN log dosyasına yazılır (`🔒 Wi-Fi PIN : ...`).
+
+> [!WARNING]
+> - PIN, ağı dinleyen birine karşı şifreleme sağlamaz: bağlantı HTTP üzerinden gider. Wi-Fi'ı yalnızca güvendiğiniz ağlarda (ev ağı gibi) kullanın, halka açık ağlarda **USB** kullanın.
+> - `--no-pin` ile korumayı kapatırsanız aynı ağdaki herkes ekranınızı görebilir ve bilgisayarınızı kontrol edebilir.
 
 Bir güvenlik açığı bulursanız lütfen herkese açık bir issue yerine GitHub'ın [özel güvenlik bildirimi](https://github.com/VolkanCARBUGA/ekran-yansitici/security/advisories/new) özelliğini kullanın.
 
@@ -258,6 +287,8 @@ Bir güvenlik açığı bulursanız lütfen herkese açık bir issue yerine GitH
 | Görüntü var ama dokunma çalışmıyor (macOS) | `Python.app`'e **Erişilebilirlik** izni verin. |
 | Tablet takılınca sayfa açılmıyor | `adb devices` çıktısında cihazın `device` durumunda olduğunu kontrol edin. Tablette USB hata ayıklama iznini onaylayın. |
 | `ADB: Yok` yazıyor | ADB kurulu değil ya da PATH'te değil. Bkz. [Gereksinimler](#-gereksinimler). |
+| PIN'i bilmiyorum / unuttum | Tableti USB ile bağlayıp 🔒 düğmesine dokunun, ya da log dosyasına bakın. Yeni PIN için sunucuyu bir kez `--reset-pin` ile çalıştırın. |
+| `Çok fazla yanlış deneme` | Gösterilen süre kadar bekleyin. Kilit IP başınadır ve sunucu yeniden başlayınca sıfırlanır. |
 | Wi-Fi'dan bağlanılamıyor | Tablet ve bilgisayarın aynı ağda olduğundan ve güvenlik duvarının 8080 portuna izin verdiğinden emin olun. |
 | Windows'ta tıklamalar kaymış | Ekran ölçeklemesi (%125/%150) kaynaklı olabilir. Sorun sürerse ölçekleme oranınızla birlikte bir issue açın. |
 | Ana ekran değişmiyor | Kapak kapalıyken (clamshell) yerleşik ekran listede görünmez. Loglarda `Ana ekran →` satırlarına bakın. |
@@ -279,6 +310,12 @@ Hayır. Her şey tabletin tarayıcısında çalışır. İsterseniz Chrome menü
 <summary><b>iPad ile çalışır mı?</b></summary>
 
 Wi-Fi üzerinden çalışması beklenir, çünkü arayüz standart bir web sayfasıdır. USB ile otomatik açılma ise ADB'ye dayandığı için yalnızca Android'de çalışır.
+</details>
+
+<details>
+<summary><b>USB'de neden PIN sorulmuyor?</b></summary>
+
+USB bağlantısı ADB tüneliyle bilgisayarın kendi içinden (`127.0.0.1`) gelir. Tabletin bu yolla bağlanabilmesi için kabloyla takılı olması ve bilgisayara USB hata ayıklama izni vermiş olması gerekir; yani fiziksel erişim zaten vardır. Bu sayede kırık ekranlı bilgisayarda tak-çalıştır akışı bozulmaz.
 </details>
 
 <details>
@@ -320,12 +357,13 @@ ekran-yansitici/
     ├── platform_mac.py          # macOS: CoreGraphics fare / ekran / ana ekran, caffeinate
     ├── platform_win.py          # Windows: SendInput, QueryDisplayConfig, ChangeDisplaySettingsEx
     ├── usb_bridge.py            # ADB izleme, adb reverse, tablette tarayıcıyı açma
+    ├── pin_auth.py              # Wi-Fi PIN koruması, jeton ve deneme kilidi
     ├── macos_python.sh          # macOS Python / venv seçimi
     ├── windows_install.ps1      # Windows kurulum betiği
     ├── requirements.txt
     └── web/                     # Tablet arayüzü
         ├── index.html
-        ├── app.js               # WebSocket, canvas çizimi, dokunma hareketleri, zoom
+        ├── app.js               # WebSocket, PIN ekranı, canvas çizimi, dokunma hareketleri, zoom
         ├── style.css
         └── manifest.json        # PWA
 ```
@@ -342,7 +380,8 @@ Windows'ta bir sorunla karşılaşırsanız lütfen **Windows sürümünüzü**,
 
 ## 🗺️ Yol Haritası
 
-- [ ] Wi-Fi bağlantısı için PIN / parola koruması
+- [x] Wi-Fi bağlantısı için PIN koruması
+- [ ] Wi-Fi bağlantısını HTTPS/WSS ile şifreleme
 - [ ] Tablette ekran klavyesi ve kısayol çubuğu
 - [ ] Linux desteği (X11 / Wayland)
 - [ ] H.264 / WebCodecs ile daha düşük bant genişliği

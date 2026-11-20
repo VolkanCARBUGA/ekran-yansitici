@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>Ekran Yansıtıcı</title>
   <link rel="manifest" href="/manifest.json" />
-  <link rel="stylesheet" href="/style.css?v=2.4" />
+  <link rel="stylesheet" href="/style.css?v=2.5" />
 </head>
 <body>
   <main id="stage" aria-label="Bilgisayar Ekranı">
@@ -19,19 +19,27 @@
   <!-- Bağlantı Katmanı -->
   <div id="overlay" class="overlay" role="status" aria-live="polite">
     <div class="overlay-card">
-      <div class="spinner" aria-hidden="true"></div>
+      <div id="spinner" class="spinner" aria-hidden="true"></div>
       <h1 id="overlay-title">Bilgisayara Bağlanılıyor...</h1>
       <p id="overlay-subtitle">Ekran akışı başlatılıyor</p>
+      <!-- Wi-Fi PIN girişi (USB bağlantısında gösterilmez) -->
+      <form id="pin-form" class="pin-form hidden" autocomplete="off">
+        <input id="pin-input" class="pin-input" type="password" inputmode="numeric" pattern="[0-9]*"
+               maxlength="12" placeholder="••••••" aria-label="PIN kodu" required />
+        <button id="pin-submit" class="btn" type="submit">Bağlan</button>
+        <p id="pin-error" class="pin-error" role="alert"></p>
+      </form>
       <button id="btn-retry" class="btn hidden" type="button">Tekrar Dene</button>
     </div>
   </div>
 
   <!-- Sade Alt Köşe Kontrolü: Sadece Tam Ekran / Çık + (Yakınlaştırıldığında) 100% Sıfırla -->
   <div class="controls">
+    <button id="btn-pin" class="pill hidden" type="button" title="Wi-Fi PIN'ini göster">🔒</button>
     <button id="btn-zoom-reset" class="pill hidden" type="button" title="Yakınlaştırmayı Sıfırla">100%</button>
     <button id="btn-fullscreen" class="pill" type="button" title="Tam Ekran Yap / Çık">⛶ Tam Ekran</button>
   </div>
 
-  <script src="/app.js?v=2.4"></script>
+  <script src="/app.js?v=2.5"></script>
 </body>
 </html>

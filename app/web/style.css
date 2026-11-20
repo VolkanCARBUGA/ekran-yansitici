@@ -130,3 +130,40 @@ html, body {
   opacity: 1;
   transform: scale(0.95);
 }
+
+/* Wi-Fi PIN girişi */
+.pin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pin-input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: #0b0c14;
+  color: #f5f5f7;
+  font-size: 24px;
+  letter-spacing: 0.4em;
+  text-align: center;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.pin-input:focus {
+  outline: none;
+  border-color: #0a84ff;
+}
+
+.pin-input:disabled,
+.btn:disabled {
+  opacity: 0.5;
+}
+
+.overlay-card .pin-error {
+  min-height: 1.2em;
+  margin: 0;
+  color: #ff6b6b;
+}

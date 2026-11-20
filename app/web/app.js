@@ -11,6 +11,12 @@
   const overlayTitle = document.getElementById("overlay-title");
   const overlaySubtitle = document.getElementById("overlay-subtitle");
   const btnRetry = document.getElementById("btn-retry");
+  const spinner = document.getElementById("spinner");
+  const pinForm = document.getElementById("pin-form");
+  const pinInput = document.getElementById("pin-input");
+  const pinSubmit = document.getElementById("pin-submit");
+  const pinError = document.getElementById("pin-error");
+  const btnPin = document.getElementById("btn-pin");
 
   const btnFullscreen = document.getElementById("btn-fullscreen");
   const btnZoomReset = document.getElementById("btn-zoom-reset");
@@ -20,6 +26,14 @@
   let reconnectAttempt = 0;
   let lastFrameAt = performance.now();
   let jpegDecoding = false;
+
+  // Wi-Fi PIN doğrulama durumu
+  const TOKEN_KEY = "ekranYansiticiToken";
+  let streaming = false;      // init alındı, görüntü akıyor
+  let tokenTried = false;     // bu bağlantıda kayıtlı jeton denendi mi
+  let lockTimer = null;
+  let wifiPin = null;         // yalnızca USB bağlantısında sunucu gönderir
+  let pinRevealTimer = null;
 
   let frameWidth = 1440;
   let frameHeight = 900;
@@ -134,6 +148,118 @@
     }
   }
 
+  // localStorage gizli sekmede/kapalıyken hata fırlatabilir
+  function getToken() {
+    try { return localStorage.getItem(TOKEN_KEY); } catch (_) { return null; }
+  }
+  function setToken(t) {
+    try { localStorage.setItem(TOKEN_KEY, t); } catch (_) {}
+  }
+  function removeToken() {
+    try { localStorage.removeItem(TOKEN_KEY); } catch (_) {}
+  }
+
+  function hidePinForm() {
+    clearInterval(lockTimer);
+    pinForm.classList.add("hidden");
+    spinner.classList.remove("hidden");
+  }
+
+  // PIN ekranını gösterir; lockedFor > 0 ise geri sayım boyunca girişi kilitler
+  function showPinForm({ lockedFor = 0, attemptsLeft = null, wrong = false } = {}) {
+    overlay.classList.remove("hidden");
+    spinner.classList.add("hidden");
+    btnRetry.classList.add("hidden");
+    pinForm.classList.remove("hidden");
+    overlayTitle.textContent = "🔒 PIN Gerekli";
+    overlaySubtitle.textContent =
+      "Wi-Fi ile bağlanmak için bilgisayarın PIN'ini girin. PIN'i USB ile bağlı tabletteki 🔒 düğmesinden veya sunucu logundan görebilirsiniz.";
+
+    clearInterval(lockTimer);
+    if (lockedFor > 0) {
+      let left = lockedFor;
+      const tick = () => {
+        if (left <= 0) {
+          clearInterval(lockTimer);
+          pinInput.disabled = false;
+          pinSubmit.disabled = false;
+          pinError.textContent = "";
+          pinInput.focus();
+          return;
+        }
+        pinError.textContent = `Çok fazla yanlış deneme. ${left} sn sonra tekrar deneyin.`;
+        left--;
+      };
+      pinInput.disabled = true;
+      pinSubmit.disabled = true;
+      tick();
+      lockTimer = setInterval(tick, 1000);
+      return;
+    }
+
+    pinInput.disabled = false;
+    pinSubmit.disabled = false;
+    pinError.textContent = wrong
+      ? `Yanlış PIN.${attemptsLeft != null ? ` Kalan deneme: ${attemptsLeft}` : ""}`
+      : "";
+    pinInput.focus();
+  }
+
+  function handleControlMessage(msg) {
+    switch (msg.type) {
+      case "auth_required": {
+        const token = getToken();
+        if (token && !tokenTried) {
+          tokenTried = true;
+          sendJson({ type: "auth", token });
+        } else {
+          showPinForm({ lockedFor: msg.locked_for || 0 });
+        }
+        break;
+      }
+      case "auth_failed":
+        if (msg.via === "token") {
+          removeToken();  // PIN değişmiş: eski jeton geçersiz
+          showPinForm({ lockedFor: msg.locked_for || 0 });
+        } else {
+          showPinForm({ lockedFor: msg.locked_for || 0, attemptsLeft: msg.attempts_left, wrong: true });
+        }
+        break;
+      case "auth_ok":
+        setToken(msg.token);
+        hidePinForm();
+        overlayTitle.textContent = "Bilgisayara Bağlanılıyor...";
+        overlaySubtitle.textContent = "Ekran akışı başlatılıyor";
+        break;
+      case "init":
+        streaming = true;
+        lastFrameAt = performance.now();
+        hidePinForm();
+        overlay.classList.add("hidden");
+        requestWakeLock();
+        sendJson({ type: "set_touch_enabled", enabled: true });
+        wifiPin = msg.wifi_pin || null;
+        btnPin.classList.toggle("hidden", !wifiPin);
+        break;
+    }
+  }
+
+  pinForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const pin = pinInput.value.trim();
+    if (!pin) return;
+    pinInput.value = "";
+    pinError.textContent = "";
+    sendJson({ type: "auth", pin });
+  });
+
+  btnPin.addEventListener("click", () => {
+    if (!wifiPin) return;
+    clearTimeout(pinRevealTimer);
+    btnPin.textContent = `🔒 Wi-Fi PIN: ${wifiPin}`;
+    pinRevealTimer = setTimeout(() => { btnPin.textContent = "🔒"; }, 10000);
+  });
+
   function connect() {
     clearTimeout(reconnectTimer);
     if (ws) {
@@ -157,14 +283,15 @@
     ws.onopen = () => {
       reconnectAttempt = 0;
       lastFrameAt = performance.now();
-      overlay.classList.add("hidden");
-      requestWakeLock();
+      // Katman, sunucu "init" (veya PIN isteği) gönderene kadar açık kalır
       sendJson({ type: "hello", protocol: 2, codec: "jpeg" });
-      sendJson({ type: "set_touch_enabled", enabled: true });
     };
 
     ws.onmessage = (ev) => {
-      if (typeof ev.data === "string") return;
+      if (typeof ev.data === "string") {
+        try { handleControlMessage(JSON.parse(ev.data)); } catch (_) {}
+        return;
+      }
       const buf = new Uint8Array(ev.data);
       if (buf.length < 2) return;
       if (buf[0] === PKT_JPEG) {
@@ -174,6 +301,9 @@
 
     ws.onerror = () => {};
     ws.onclose = () => {
+      streaming = false;
+      tokenTried = false;
+      hidePinForm();
       reconnectAttempt++;
       const delay = Math.min(5000, 1000 * Math.min(reconnectAttempt, 4));
       overlay.classList.remove("hidden");
@@ -189,6 +319,7 @@
   setInterval(() => {
     if (
       document.visibilityState === "visible" &&
+      streaming &&
       ws &&
       ws.readyState === WebSocket.OPEN &&
       performance.now() - lastFrameAt > 6000

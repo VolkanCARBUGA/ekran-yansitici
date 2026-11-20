@@ -48,10 +48,12 @@ import mss
 from PIL import Image, ImageDraw
 from pynput.keyboard import Controller as KeyboardController, Key
 
+from pin_auth import PinGuard, is_local_address
 from usb_bridge import UsbAdbBridge
 
 DEFAULT_PORT = 8080
 PKT_JPEG = b"\x03"
+AUTH_TIMEOUT_SECONDS = 120
 
 
 from platform_layer import IS_MAC, IS_WINDOWS, PLATFORM_NAME, controller
@@ -147,6 +149,7 @@ class StreamServer:
         fps: int = 60,
         quality: int = 78,
         auto_main_display: bool = True,
+        pin_guard: Optional[PinGuard] = None,
     ):
         self.port = port
         self.fps = fps
@@ -167,6 +170,7 @@ class StreamServer:
         self.auto_main_display = auto_main_display
         self._tablet_last_seen = 0.0
 
+        self.pin_guard = pin_guard or PinGuard(enabled=False)
         self.usb_bridge = UsbAdbBridge(port=self.port, auto_open_browser=True)
 
     def _get_active_bounds_tuple(self):
@@ -411,20 +415,28 @@ class StreamServer:
 
         client_ip = request.remote or "unknown"
         client_id = f"{client_ip}:{id(ws)}"
+        is_usb = is_local_address(client_ip)
+
+        if self.pin_guard.requires_auth(client_ip) and not await self._authenticate(ws, client_ip):
+            await self._safe_close(ws)
+            return ws
+
         session = ClientSession(ws, client_id, client_ip)
         self.sessions[ws] = session
-
-        is_usb = client_ip in ("127.0.0.1", "::1")
         print(f"📱  Tablet bağlandı ({'USB' if is_usb else 'Wi-Fi'}): {client_id}")
 
-        await ws.send_json({
+        init_msg = {
             "type": "init",
             "device_name": self.device_name,
             "monitors": self.list_monitors(),
             "active_monitor": self.active_monitor_index,
             "ax_trusted": controller.is_accessibility_trusted() if controller else False,
             "connection_mode": "usb" if is_usb else "wifi",
-        })
+        }
+        # PIN yalnızca USB'ye bağlı tablete gösterilir: ekran kırıkken PIN'i görmenin yolu budur
+        if is_usb and self.pin_guard.enabled:
+            init_msg["wifi_pin"] = self.pin_guard.pin
+        await ws.send_json(init_msg)
 
         try:
             async for msg in ws:
@@ -452,7 +464,49 @@ class StreamServer:
 
         return ws
 
+    async def _authenticate(self, ws: web.WebSocketResponse, client_ip: str) -> bool:
+        """Wi-Fi istemcisinden PIN veya kayıtlı jeton bekler. Doğrulanana kadar görüntü/girdi yoktur."""
+        guard = self.pin_guard
+        await ws.send_json({"type": "auth_required", "locked_for": guard.locked_for(client_ip)})
+        deadline = time.monotonic() + AUTH_TIMEOUT_SECONDS
+        while True:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                return False
+            try:
+                msg = await ws.receive(timeout=remaining)
+            except asyncio.TimeoutError:
+                return False
+            if msg.type != aiohttp.WSMsgType.TEXT:
+                if msg.type in (aiohttp.WSMsgType.CLOSE, aiohttp.WSMsgType.CLOSING,
+                                aiohttp.WSMsgType.CLOSED, aiohttp.WSMsgType.ERROR):
+                    return False
+                continue
+            try:
+                data = json.loads(msg.data)
+            except Exception:
+                continue
+            if data.get("type") != "auth":
+                continue
+
+            if "token" in data:
+                ok, locked, left = guard.check_token(data.get("token")), guard.locked_for(client_ip), None
+            else:
+                ok, locked, left = guard.try_pin(client_ip, data.get("pin"))
+
+            if ok:
+                await ws.send_json({"type": "auth_ok", "token": guard.token()})
+                return True
+            reply = {"type": "auth_failed", "locked_for": locked, "via": "token" if "token" in data else "pin"}
+            if left is not None:
+                reply["attempts_left"] = left
+            await ws.send_json(reply)
+
     async def api_info(self, request: web.Request):
+        if self.pin_guard.requires_auth(request.remote) and not self.pin_guard.check_token(
+            request.headers.get("X-Ekran-Token") or request.query.get("token")
+        ):
+            return web.json_response({"error": "PIN gerekli"}, status=401)
         return web.json_response(
             {
                 "service": "ekran-yansitici",
@@ -508,6 +562,10 @@ class StreamServer:
         print(f"📡  Wi-Fi (Kablosuz)     : http://{self.local_ip}:{self.port}")
         print(f"📺  Aktif Ekran          : Monitör {self.active_monitor_index} (Yerleşik Ekran)")
         print(f"🖱️  Erişilebilirlik İzni : {'✅ Açık (Dokunmatik aktif!)' if ax_ok else '⚠️ KAPALI'}")
+        if self.pin_guard.enabled:
+            print(f"🔒  Wi-Fi PIN            : {self.pin_guard.pin}  (USB'de sorulmaz)")
+        else:
+            print("🔓  Wi-Fi PIN            : KAPALI (ağdaki herkes bağlanabilir!)")
         print("=" * 60)
 
         if controller:
@@ -538,6 +596,9 @@ def main():
     parser.add_argument("--fps", type=int, default=60)
     parser.add_argument("--quality", type=int, default=78)
     parser.add_argument("--no-auto-main", action="store_true", help="Ana ekranı tablete göre otomatik değiştirme")
+    parser.add_argument("--pin", help="Wi-Fi PIN'ini bu değerle değiştir (kaydedilmez; EKRAN_PIN ile de verilebilir)")
+    parser.add_argument("--reset-pin", action="store_true", help="Yeni rastgele PIN üret ve kaydet")
+    parser.add_argument("--no-pin", action="store_true", help="PIN korumasını kapat (önerilmez)")
     args = parser.parse_args()
     StreamServer(
         port=args.port,
@@ -545,6 +606,7 @@ def main():
         fps=args.fps,
         quality=args.quality,
         auto_main_display=not args.no_auto_main,
+        pin_guard=PinGuard(enabled=not args.no_pin, pin_override=args.pin, reset=args.reset_pin),
     ).run()
 
 
