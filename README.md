@@ -12,7 +12,7 @@ Ekranı kırık bir MacBook'u kullanmaya devam etmek için yazıldı, sonradan W
   <img src="docs/assets/hero.svg" alt="Ekranı kırık dizüstü, USB kabloyla bağlı tablette masaüstünü gösteriyor" width="820">
 </p>
 
-*English: mirrors a laptop's built-in screen to an Android tablet over USB (ADB) or Wi-Fi, with touch input. While the tablet is connected it is the primary display; when you unplug it, an external monitor becomes primary. macOS and Windows, Python 3.10+, MIT.*
+**English:** mirrors a laptop's built-in screen to an Android tablet over USB (ADB) or Wi-Fi, with touch input. While the tablet is connected it is the primary display; when you unplug it, an external monitor becomes primary. macOS and Windows, Python 3.10+, MIT.
 
 ## Ne yapar
 
@@ -54,9 +54,9 @@ Tablet bağlantısı 4 saniyeden uzun koparsa ana ekran monitöre geçer. Böyle
 
 Tableti USB ile kullanacaksanız bir kez USB hata ayıklamayı açmanız gerekir:
 
-1. *Ayarlar → Tablet hakkında* bölümünde *Yapı numarası*na yedi kez dokunun.
-2. *Geliştirici seçenekleri* altında *USB hata ayıklama*yı açın.
-3. Tableti ilk taktığınızda çıkan izin sorusuna *Her zaman izin ver* deyin.
+1. **Ayarlar → Tablet hakkında** bölümünde **Yapı numarası**na yedi kez dokunun.
+2. **Geliştirici seçenekleri** altında **USB hata ayıklama**yı açın.
+3. Tableti ilk taktığınızda çıkan izin sorusuna **Her zaman izin ver** deyin.
 
 ## Kurulum
 
@@ -80,7 +80,7 @@ Kurulum:
 - bir sanal ortam (venv) oluşturur,
 - bir LaunchAgent ekler.
 
-İlk çalıştırmada *Sistem Ayarları → Gizlilik ve Güvenlik* altında iki izin vermeniz gerekir:
+İlk çalıştırmada **Sistem Ayarları → Gizlilik ve Güvenlik** altında iki izin vermeniz gerekir:
 
 - **Ekran Kaydı:** Bu izin olmadan görüntü siyah gelir.
 - **Erişilebilirlik:** Bu izin olmadan dokunma çalışmaz.
@@ -103,7 +103,7 @@ Loglar `%LOCALAPPDATA%\EkranYansitici\logs\server.log` dosyasındadır.
 
 Bilinmesi gereken iki şey:
 
-- **Güvenlik duvarı:** İlk açılışta izin isteyebilir. Wi-Fi için *Özel ağlar*a izin verin; USB bu izin olmadan da çalışır.
+- **Güvenlik duvarı:** İlk açılışta izin isteyebilir. Wi-Fi için **Özel ağlar**a izin verin; USB bu izin olmadan da çalışır.
 - **Yönetici pencereleri:** Windows, normal bir uygulamanın yönetici olarak çalışan pencerelere tıklama göndermesine izin vermez. Bu pencereleri dokunmatikle kullanmanız gerekiyorsa sunucuyu yönetici olarak başlatın.
 
 Kaldırmak için: `OTOMATIK_BASLATMA_KUR.bat --kaldir`
