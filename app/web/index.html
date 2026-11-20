@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Ekran Yansıtıcı</title>
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="stylesheet" href="/style.css?v=2.4" />
+</head>
+<body>
+  <main id="stage" aria-label="Bilgisayar Ekranı">
+    <canvas id="screen"></canvas>
+  </main>
+
+  <!-- Bağlantı Katmanı -->
+  <div id="overlay" class="overlay" role="status" aria-live="polite">
+    <div class="overlay-card">
+      <div class="spinner" aria-hidden="true"></div>
+      <h1 id="overlay-title">Bilgisayara Bağlanılıyor...</h1>
+      <p id="overlay-subtitle">Ekran akışı başlatılıyor</p>
+      <button id="btn-retry" class="btn hidden" type="button">Tekrar Dene</button>
+    </div>
+  </div>
+
+  <!-- Sade Alt Köşe Kontrolü: Sadece Tam Ekran / Çık + (Yakınlaştırıldığında) 100% Sıfırla -->
+  <div class="controls">
+    <button id="btn-zoom-reset" class="pill hidden" type="button" title="Yakınlaştırmayı Sıfırla">100%</button>
+    <button id="btn-fullscreen" class="pill" type="button" title="Tam Ekran Yap / Çık">⛶ Tam Ekran</button>
+  </div>
+
+  <script src="/app.js?v=2.4"></script>
+</body>
+</html>

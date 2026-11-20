@@ -1,0 +1,11 @@
+{
+  "name": "Ekran Yansıtıcı — Tablet Ana Monitör",
+  "short_name": "Ekran",
+  "description": "Ekranı kırık Mac / Windows bilgisayar için USB ve Wi-Fi Android tablet ana monitör uygulaması",
+  "start_url": "/",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#000000",
+  "theme_color": "#0b0c14"
+}
+

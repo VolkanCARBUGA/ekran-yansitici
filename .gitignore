@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+
+# Çalışma zamanı
+logs/
+*.log
+
+# Windows'ta yanına konan ADB (isteğe bağlı)
+app/platform-tools/
+
+# İşletim sistemi / editör
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
