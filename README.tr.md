@@ -13,7 +13,7 @@ Ekranı kırık bir MacBook'u kullanmaya devam etmek için yazıldı, sonradan W
 <p align="center">
   <img src="docs/assets/hero.jpg" alt="Masada ekranı kırık bir dizüstü; USB kabloyla bağlı tablet bilgisayarın masaüstünü gösteriyor ve bir parmak tablete dokunuyor" width="880">
   <br>
-  <sub>Temsili görsel, yapay zekâ ile üretildi.</sub>
+  <sub>Temsili görsel, Figma'da yapay zekâ ile üretildi.</sub>
 </p>
 
 ## Ne yapar
@@ -33,15 +33,20 @@ Ekranı kırık bir MacBook'u kullanmaya devam etmek için yazıldı, sonradan W
 
 Kırık ekranda menü çubuğunun ya da yeni açılan pencerelerin kaybolmaması için ana ekran, tablete göre otomatik değişir:
 
-<p align="center">
-  <img src="docs/assets/scenarios.svg" alt="Yalnızca tablet: tablet ana ekran. Tablet ve monitör: tablet ana, monitör ikinci ekran. Yalnızca monitör: monitör ana ekran." width="820">
-</p>
+<table>
+  <tr>
+    <td width="33%"><img src="docs/assets/scenario-tablet.jpg" alt="Kırık dizüstü ve USB ile bağlı, masaüstünü, menü çubuğunu ve dock'u gösteren tablet"></td>
+    <td width="33%"><img src="docs/assets/scenario-tablet-monitor.jpg" alt="Kırık dizüstü, dock'lu masaüstünü gösteren tablet ve yalnızca duvar kâğıdı ile bir pencere gösteren monitör"></td>
+    <td width="33%"><img src="docs/assets/scenario-monitor.jpg" alt="Kırık dizüstü ve menü çubuğu ile dock'u gösteren monitör; boş tablet standı ve takılı olmayan kablo"></td>
+  </tr>
+  <tr>
+    <td><b>Yalnızca tablet</b><br>Ana ekran: tablet</td>
+    <td><b>Tablet ve monitör</b><br>Ana: tablet · ikinci: monitör</td>
+    <td><b>Yalnızca monitör</b><br>Ana: monitör · ikinci: kırık ekran</td>
+  </tr>
+</table>
 
-| Bağlı olanlar | Ana ekran | İkinci ekran |
-|---|---|---|
-| Yalnızca tablet | Tablet | — |
-| Tablet ve monitör | Tablet | Monitör |
-| Yalnızca monitör | Monitör | Kırık ekran |
+<sub>Temsili görseller, Figma'da yapay zekâ ile üretildi.</sub>
 
 Tablet bağlantısı 4 saniyeden uzun koparsa ana ekran monitöre geçer. Böylece kısa kopmalarda ekran gidip gelmez. Ekranların birbirine göre yerleşimi korunur. Bu davranışı `--no-auto-main` ile kapatabilirsiniz.
 

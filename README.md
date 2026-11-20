@@ -13,7 +13,7 @@ It was written to keep a MacBook with a cracked screen in use. Windows support c
 <p align="center">
   <img src="docs/assets/hero.jpg" alt="A laptop with a shattered screen on a desk; a tablet connected by USB shows the computer's desktop while a finger touches it" width="880">
   <br>
-  <sub>Illustrative image, generated with AI.</sub>
+  <sub>Illustrative image, generated with AI in Figma.</sub>
 </p>
 
 The name is Turkish for "screen mirror". The interface and logs are in Turkish for now; the commands and options below are the same in any language.
@@ -35,15 +35,20 @@ The name is Turkish for "screen mirror". The interface and logs are in Turkish f
 
 So that the menu bar and new windows never end up on the broken screen, the main display follows the tablet:
 
-<p align="center">
-  <img src="docs/assets/scenarios.en.svg" alt="Tablet only: the tablet is the main display. Tablet and monitor: the tablet is main, the monitor second. Monitor only: the monitor is the main display." width="820">
-</p>
+<table>
+  <tr>
+    <td width="33%"><img src="docs/assets/scenario-tablet.jpg" alt="Broken laptop with a USB-connected tablet showing the desktop, menu bar and dock"></td>
+    <td width="33%"><img src="docs/assets/scenario-tablet-monitor.jpg" alt="Broken laptop, tablet showing the desktop with the dock, and a monitor showing only wallpaper and a window"></td>
+    <td width="33%"><img src="docs/assets/scenario-monitor.jpg" alt="Broken laptop and a monitor showing the desktop with menu bar and dock; empty tablet stand and unplugged cable"></td>
+  </tr>
+  <tr>
+    <td><b>Tablet only</b><br>Main display: tablet</td>
+    <td><b>Tablet and monitor</b><br>Main: tablet · second: monitor</td>
+    <td><b>Monitor only</b><br>Main: monitor · second: broken screen</td>
+  </tr>
+</table>
 
-| Connected | Main display | Second display |
-|---|---|---|
-| Tablet only | Tablet | — |
-| Tablet and monitor | Tablet | Monitor |
-| Monitor only | Monitor | Broken screen |
+<sub>Illustrative images, generated with AI in Figma.</sub>
 
 If the tablet stays disconnected for more than 4 seconds, the main display moves to the monitor, so short dropouts do not make it jump back and forth. The relative arrangement of the displays is kept. Turn this off with `--no-auto-main`.
 
