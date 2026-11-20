@@ -1,208 +1,212 @@
 # Ekran Yansıtıcı
 
-[![Lisans: MIT](https://img.shields.io/badge/lisans-MIT-blue)](LICENSE)
+**English** · [Türkçe](README.tr.md)
+
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/downloads/)
-[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows-lightgrey)](#kurulum)
+[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows-lightgrey)](#installation)
 
-Ekranı kırık bir dizüstü bilgisayarın görüntüsünü Android tablete aktarır ve tabletten dokunarak kullanmanızı sağlar. Tablet USB kablo ya da Wi-Fi ile bağlanır, tablete uygulama kurmak gerekmez: görüntü tarayıcıda açılır.
+Mirrors the built-in screen of a laptop with a broken display to an Android tablet and lets you use it by touch. The tablet connects over a USB cable or Wi-Fi, and nothing has to be installed on it: the screen opens in the browser.
 
-Ekranı kırık bir MacBook'u kullanmaya devam etmek için yazıldı, sonradan Windows desteği eklendi.
-
-<p align="center">
-  <img src="docs/assets/hero.svg" alt="Ekranı kırık dizüstü, USB kabloyla bağlı tablette masaüstünü gösteriyor" width="820">
-</p>
-
-**English:** mirrors a laptop's built-in screen to an Android tablet over USB (ADB) or Wi-Fi, with touch input. While the tablet is connected it is the primary display; when you unplug it, an external monitor becomes primary. macOS and Windows, Python 3.10+, MIT.
-
-## Ne yapar
-
-- Tablet USB ile takılınca `adb reverse` tünelini kurar ve tablette sayfayı kendisi açar.
-- Aynı ağdaysanız Wi-Fi üzerinden de bağlanabilirsiniz. Bu durumda 6 haneli bir PIN sorulur.
-- Dokunmalar fareye çevrilir:
-  - Dokunma → tık
-  - Çift dokunma → çift tık
-  - Uzun basma → sağ tık
-  - Sürükleme → sürükle-bırak
-  - İki parmak → yakınlaştırma
-- Harici monitör takılıysa ana ekranı (menü çubuğu, Dock, görev çubuğu) tablete göre değiştirir. Ayrıntısı aşağıda.
-- Servis olarak kurulur. Açılışta başlar, kapanırsa yeniden başlar.
-
-## Ana ekran nasıl seçilir
-
-Kırık ekranda menü çubuğunun ya da yeni açılan pencerelerin kaybolmaması için ana ekran, tablete göre otomatik değişir:
+It was written to keep a MacBook with a cracked screen in use. Windows support came later.
 
 <p align="center">
-  <img src="docs/assets/scenarios.svg" alt="Yalnızca tablet: tablet ana ekran. Tablet ve monitör: tablet ana, monitör ikinci ekran. Yalnızca monitör: monitör ana ekran." width="820">
+  <img src="docs/assets/hero.jpg" alt="A laptop with a shattered screen on a desk; a tablet connected by USB shows the computer's desktop while a finger touches it" width="880">
+  <br>
+  <sub>Illustrative image, generated with AI.</sub>
 </p>
 
-| Bağlı olanlar | Ana ekran | İkinci ekran |
+The name is Turkish for "screen mirror". The interface and logs are in Turkish for now; the commands and options below are the same in any language.
+
+## What it does
+
+- When the tablet is plugged in over USB, it sets up an `adb reverse` tunnel and opens the page on the tablet by itself.
+- On the same network you can also connect over Wi-Fi. A 6-digit PIN is required in that case.
+- Touches become mouse input:
+  - Tap → click
+  - Double tap → double click
+  - Long press → right click
+  - Drag → drag and drop
+  - Two fingers → zoom
+- With an external monitor attached, it moves the main display (menu bar, Dock, taskbar) depending on whether the tablet is connected. Details below.
+- It installs as a background service that starts at login and restarts if it stops.
+
+## How the main display is chosen
+
+So that the menu bar and new windows never end up on the broken screen, the main display follows the tablet:
+
+<p align="center">
+  <img src="docs/assets/scenarios.en.svg" alt="Tablet only: the tablet is the main display. Tablet and monitor: the tablet is main, the monitor second. Monitor only: the monitor is the main display." width="820">
+</p>
+
+| Connected | Main display | Second display |
 |---|---|---|
-| Yalnızca tablet | Tablet | — |
-| Tablet ve monitör | Tablet | Monitör |
-| Yalnızca monitör | Monitör | Kırık ekran |
+| Tablet only | Tablet | — |
+| Tablet and monitor | Tablet | Monitor |
+| Monitor only | Monitor | Broken screen |
 
-Tablet bağlantısı 4 saniyeden uzun koparsa ana ekran monitöre geçer. Böylece kısa kopmalarda ekran gidip gelmez. Ekranların birbirine göre yerleşimi korunur. Bu davranışı `--no-auto-main` ile kapatabilirsiniz.
+If the tablet stays disconnected for more than 4 seconds, the main display moves to the monitor, so short dropouts do not make it jump back and forth. The relative arrangement of the displays is kept. Turn this off with `--no-auto-main`.
 
-## Gereksinimler
+## Requirements
 
-- **Bilgisayar:** macOS 12+ veya Windows 10/11
-- **Python 3.10+:** Windows'ta kurulum sırasında "Add python.exe to PATH" işaretli olmalı.
-- **ADB (yalnızca USB için):**
+- **Computer:** macOS 12+ or Windows 10/11
+- **Python 3.10+:** on Windows, tick "Add python.exe to PATH" during installation.
+- **ADB (USB only):**
   - macOS: `brew install android-platform-tools`
-  - Windows: [Platform Tools](https://developer.android.com/tools/releases/platform-tools) indirilip PATH'e eklenmeli.
-- **Tablet:** Android, Chrome önerilir.
+  - Windows: download [Platform Tools](https://developer.android.com/tools/releases/platform-tools) and add it to PATH.
+- **Tablet:** Android, Chrome recommended.
 
-Tableti USB ile kullanacaksanız bir kez USB hata ayıklamayı açmanız gerekir:
+To use the tablet over USB, turn on USB debugging once:
 
-1. **Ayarlar → Tablet hakkında** bölümünde **Yapı numarası**na yedi kez dokunun.
-2. **Geliştirici seçenekleri** altında **USB hata ayıklama**yı açın.
-3. Tableti ilk taktığınızda çıkan izin sorusuna **Her zaman izin ver** deyin.
+1. In **Settings → About tablet**, tap **Build number** seven times.
+2. In **Developer options**, turn on **USB debugging**.
+3. The first time you plug the tablet in, answer the prompt with **Always allow from this computer**.
 
-## Kurulum
+## Installation
 
 ```bash
 git clone https://github.com/VolkanCARBUGA/ekran-yansitici.git
 cd ekran-yansitici
 ```
 
-Ekran hiç görünmüyorsa bu adımları harici bir monitörle, ekran paylaşımıyla (VNC / Uzak Masaüstü) ya da SSH ile yapabilirsiniz. Bir kez kurduktan sonra servis kendiliğinden başlar.
+If you cannot see the screen at all, do these steps with an external monitor, through screen sharing (VNC / Remote Desktop) or over SSH. Once installed, the service starts on its own.
 
 ### macOS
 
 ```bash
-./OTOMATIK_BASLATMA_KUR.command   # servis olarak kur
-./BASLAT.command                  # ya da yalnızca şimdilik çalıştır
+./OTOMATIK_BASLATMA_KUR.command   # install as a service
+./BASLAT.command                  # or just run it for now
 ```
 
-Kurulum:
+The installer:
 
-- dosyaları `~/Library/Application Support/EkranYansitici` altına kopyalar,
-- bir sanal ortam (venv) oluşturur,
-- bir LaunchAgent ekler.
+- copies the files to `~/Library/Application Support/EkranYansitici`,
+- creates a virtual environment (venv),
+- adds a LaunchAgent.
 
-İlk çalıştırmada **Sistem Ayarları → Gizlilik ve Güvenlik** altında iki izin vermeniz gerekir:
+On first run, grant two permissions in **System Settings → Privacy & Security**:
 
-- **Ekran Kaydı:** Bu izin olmadan görüntü siyah gelir.
-- **Erişilebilirlik:** Bu izin olmadan dokunma çalışmaz.
+- **Screen Recording:** without it the image is black.
+- **Accessibility:** without it touch input does nothing.
 
-İzin verilecek uygulama, kurulumun sonunda "Çalıştırıcı" olarak yazdırılan `Python.app`'tir. İzinleri verdikten sonra kurulumu bir kez daha çalıştırın.
+The app to grant them to is the `Python.app` printed as "Çalıştırıcı" (runner) at the end of the installer. Run the installer once more after granting them.
 
-Kaldırmak için: `./OTOMATIK_BASLATMA_KUR.command --kaldir`
+To uninstall: `./OTOMATIK_BASLATMA_KUR.command --kaldir`
 
 ### Windows
 
-`OTOMATIK_BASLATMA_KUR.bat` dosyasını çalıştırın. Yalnızca bu oturum için `BASLAT.bat` yeterlidir.
+Run `OTOMATIK_BASLATMA_KUR.bat`. For the current session only, `BASLAT.bat` is enough.
 
-Kurulum:
+The installer:
 
-- dosyaları `%LOCALAPPDATA%\EkranYansitici` altına kopyalar,
-- bir sanal ortam oluşturur,
-- Başlangıç klasörüne gizli çalışan bir başlatıcı koyar.
+- copies the files to `%LOCALAPPDATA%\EkranYansitici`,
+- creates a virtual environment,
+- puts a hidden launcher in the Startup folder.
 
-Loglar `%LOCALAPPDATA%\EkranYansitici\logs\server.log` dosyasındadır.
+Logs are in `%LOCALAPPDATA%\EkranYansitici\logs\server.log`.
 
-Bilinmesi gereken iki şey:
+Two things to know:
 
-- **Güvenlik duvarı:** İlk açılışta izin isteyebilir. Wi-Fi için **Özel ağlar**a izin verin; USB bu izin olmadan da çalışır.
-- **Yönetici pencereleri:** Windows, normal bir uygulamanın yönetici olarak çalışan pencerelere tıklama göndermesine izin vermez. Bu pencereleri dokunmatikle kullanmanız gerekiyorsa sunucuyu yönetici olarak başlatın.
+- **Firewall:** Windows may ask for permission on first start. Allow **Private networks** for Wi-Fi; USB works without it.
+- **Elevated windows:** Windows does not let a normal app send clicks to windows running as administrator. If you need to use those by touch, start the server as administrator.
 
-Kaldırmak için: `OTOMATIK_BASLATMA_KUR.bat --kaldir`
+To uninstall: `OTOMATIK_BASLATMA_KUR.bat --kaldir`
 
-## Kullanım
+## Usage
 
-**USB:** Servis kuruluyken tableti takın. Sayfa birkaç saniye içinde tablette açılır.
+**USB:** with the service installed, plug in the tablet. The page opens on it within a few seconds.
 
-**Wi-Fi:** Tablette, sunucunun başlarken yazdırdığı `http://<ip>:8080` adresini açın ve PIN'i girin. Tablet PIN'i hatırlar, bir dahaki sefere sormaz.
+**Wi-Fi:** on the tablet, open the `http://<ip>:8080` address the server prints at startup and enter the PIN. The tablet remembers it and will not ask again.
 
-Sağ alttaki düğmeler:
+Buttons in the bottom-right corner:
 
-- **Tam ekran:** tam ekrana geçer ya da çıkar.
-- **Yüzde göstergesi:** yakınlaştırmayı sıfırlar.
-- **Kilit (yalnızca USB'de görünür):** Wi-Fi PIN'ini on saniye gösterir.
+- **Full screen:** enters or leaves full screen.
+- **Zoom percentage:** resets the zoom.
+- **Lock (USB only):** shows the Wi-Fi PIN for ten seconds.
 
-## PIN ve güvenlik
+## PIN and security
 
-Sunucu bütün ağ arayüzlerinde dinler. Bu yüzden Wi-Fi'dan gelen bağlantılar PIN girilene kadar ne görüntü alır ne de dokunma gönderebilir. USB bağlantıları `127.0.0.1` üzerinden geldiği için PIN sorulmaz: tabletin kabloyla takılı olması ve bilgisayara USB hata ayıklama izni vermiş olması gerekir.
+The server listens on every network interface, so a Wi-Fi connection gets no image and cannot send input until the PIN is entered. USB connections come in through `127.0.0.1` and are not asked for a PIN: the tablet has to be plugged in and authorized for USB debugging.
 
-- **PIN'in üretilmesi:** İlk çalıştırmada rastgele üretilir ve ayar dosyasına kaydedilir. Servisi yeniden kurmak PIN'i değiştirmez.
+- **How the PIN is created:** it is generated at random on first run and saved to a settings file. Reinstalling the service does not change it.
   - macOS: `~/.config/ekran-yansitici/ayarlar.json`
   - Windows: `%APPDATA%\EkranYansitici\ayarlar.json`
-- **PIN'i görmek:** Ekran kırıkken PIN'i USB'ye bağlı tabletteki kilit düğmesinden ya da log dosyasından görebilirsiniz.
-- **Hatırlanması:** Doğru PIN'den sonra tablet bir jeton saklar. `--reset-pin` ile PIN değişince eski jetonlar geçersiz olur.
-- **Deneme kilidi:** Aynı IP'den beş yanlış denemede 30 saniye kilit uygulanır. Yanlışlar sürerse süre her seferinde ikiye katlanır, en fazla 15 dakika olur.
+- **Seeing the PIN:** with a broken screen, tap the lock button on the USB-connected tablet, or check the log file.
+- **Remembering it:** after a correct PIN the tablet stores a token. Changing the PIN with `--reset-pin` invalidates old tokens.
+- **Lockout:** five wrong attempts from the same IP lock it out for 30 seconds. Further wrong attempts double the lock each time, up to 15 minutes.
 
-PIN yabancıların bağlanmasını engeller, ama bağlantı şifrelenmez (düz HTTP). Halka açık ağlarda USB kullanın.
+The PIN keeps strangers out, but the connection is not encrypted (plain HTTP). On public networks, use USB.
 
-Bir güvenlik açığı bulursanız lütfen herkese açık bir issue yerine [özel olarak bildirin](https://github.com/VolkanCARBUGA/ekran-yansitici/security/advisories/new).
+If you find a security issue, please [report it privately](https://github.com/VolkanCARBUGA/ekran-yansitici/security/advisories/new) instead of opening a public issue.
 
-## Seçenekler
+## Options
 
 ```
 python app/server.py [--port 8080] [--monitor 1] [--fps 60] [--quality 78]
                      [--no-auto-main] [--pin PIN] [--reset-pin] [--no-pin]
 ```
 
-| Seçenek | Açıklama |
+| Option | Description |
 |---|---|
-| `--port` | Port (varsayılan 8080) |
-| `--monitor` | Yansıtılacak ekranın sırası. Yerleşik ekran her zaman 1'dir. |
-| `--fps` | Hedef kare hızı (varsayılan 60) |
-| `--quality` | JPEG kalitesi, 1–95 (varsayılan 78) |
-| `--no-auto-main` | Ana ekranı otomatik değiştirmez |
-| `--pin` | Bu çalıştırma için PIN'i belirler (kaydedilmez). `EKRAN_PIN` ortam değişkeni de olur. |
-| `--reset-pin` | Yeni bir PIN üretip kaydeder |
-| `--no-pin` | PIN korumasını kapatır. Aynı ağdaki herkes bağlanabilir hale gelir. |
+| `--port` | Port (default 8080) |
+| `--monitor` | Which display to mirror. The built-in screen is always 1. |
+| `--fps` | Target frame rate (default 60) |
+| `--quality` | JPEG quality, 1–95 (default 78) |
+| `--no-auto-main` | Do not change the main display automatically |
+| `--pin` | Set the PIN for this run (not saved). The `EKRAN_PIN` environment variable works too. |
+| `--reset-pin` | Generate and save a new PIN |
+| `--no-pin` | Turn PIN protection off. Anyone on the same network can then connect. |
 
-macOS'ta belirli bir Python kullanmak için kurulumu `EKRAN_PYTHON=/yol/python3 ./OTOMATIK_BASLATMA_KUR.command` şeklinde çalıştırın.
+To use a specific Python on macOS, run the installer as `EKRAN_PYTHON=/path/to/python3 ./OTOMATIK_BASLATMA_KUR.command`.
 
-## Sorun giderme
+## Troubleshooting
 
-| Sorun | Çözüm |
+| Problem | Fix |
 |---|---|
-| Görüntü siyah (macOS) | `Python.app`'e Ekran Kaydı izni verip kurulumu yeniden çalıştırın. |
-| Görüntü var, dokunma çalışmıyor (macOS) | `Python.app`'e Erişilebilirlik izni verin. |
-| Tablet takılınca sayfa açılmıyor | `adb devices` çıktısında cihaz `device` olarak görünmeli. Tablette USB hata ayıklama iznini onaylayın. |
-| Logda `ADB: Yok` yazıyor | ADB kurulu değil ya da PATH'te değil. |
-| PIN'i bilmiyorum | Tableti USB ile bağlayıp kilit düğmesine dokunun ya da loga bakın. Yeni PIN için bir kez `--reset-pin` ile çalıştırın. |
-| Windows'ta tıklamalar kayıyor | Büyük ihtimalle ekran ölçeklemesinden (%125/%150) kaynaklanıyor. Ölçekleme oranınızı yazarak bir issue açın. |
-| Ana ekran değişmiyor | Kapak kapalıyken yerleşik ekran görünmez. Logda `Ana ekran →` satırlarına bakın. |
+| Black image (macOS) | Grant Screen Recording to `Python.app` and run the installer again. |
+| Image works, touch does not (macOS) | Grant Accessibility to `Python.app`. |
+| Page does not open when the tablet is plugged in | `adb devices` should list the tablet as `device`. Confirm the USB debugging prompt on the tablet. |
+| Log says `ADB: Yok` (ADB: none) | ADB is not installed or not on PATH. |
+| I don't know the PIN | Connect the tablet over USB and tap the lock button, or check the log. For a new PIN, run once with `--reset-pin`. |
+| Clicks land in the wrong place on Windows | Most likely display scaling (125%/150%). Open an issue with your scaling setting. |
+| Main display does not change | With the lid closed the built-in screen is not listed. Look for `Ana ekran →` (main display →) lines in the log. |
 
-**Log dosyaları:**
+**Log files:**
 
 - macOS: `~/Library/Logs/EkranYansitici/server.log`
 - Windows: `%LOCALAPPDATA%\EkranYansitici\logs\server.log`
 
-## Nasıl çalışır
+## How it works
 
-Sunucu (`app/server.py`) yerleşik ekranı [mss](https://github.com/BoboTiG/python-mss) ile yakalar, JPEG'e çevirip imleci üstüne çizer ve WebSocket üzerinden tablete gönderir. Tablet görüntüyü bir canvas'a çizer, dokunmaları geri yollar. Sunucu da bunları işletim sisteminin fare olaylarına çevirir.
+The server (`app/server.py`) captures the built-in screen with [mss](https://github.com/BoboTiG/python-mss), encodes it as JPEG with the cursor drawn on top, and sends it to the tablet over a WebSocket. The tablet draws it on a canvas and sends touches back, which the server turns into the operating system's mouse events.
 
-İşletim sistemine özel kısımlar iki dosyadadır. İkisi de `ctypes` ile yazıldı, derlenmesi gereken bir bağımlılık yok:
+The OS-specific parts live in two files. Both are written with `ctypes`, so nothing needs compiling:
 
-- `app/platform_mac.py`: CoreGraphics ile fare olayları, ekran listesi ve ana ekran değiştirme
-- `app/platform_win.py`: Aynı işler Win32 ile: `SendInput`, `QueryDisplayConfig`, `ChangeDisplaySettingsEx`
+- `app/platform_mac.py`: mouse events, display list and main display switching with CoreGraphics
+- `app/platform_win.py`: the same with Win32: `SendInput`, `QueryDisplayConfig`, `ChangeDisplaySettingsEx`
 
-Diğer dosyalar:
+Other files:
 
-- `app/usb_bridge.py`: ADB'yi izler, tablet takılınca tüneli kurup tarayıcıyı açar.
-- `app/pin_auth.py`: PIN, jeton ve deneme kilidi.
-- `app/web/`: Tablette açılan arayüz.
+- `app/usb_bridge.py`: watches ADB, sets up the tunnel and opens the browser when the tablet is plugged in.
+- `app/pin_auth.py`: PIN, token and lockout.
+- `app/web/`: the page that opens on the tablet.
 
-## Durum
+## Status
 
-macOS'ta günlük kullanımda test edildi. Windows desteği yeni ve henüz gerçek donanımda pek denenmedi. Sorun yaşarsanız Windows sürümünüzü, ekran ölçeklemenizi ve `server.log` içeriğini ekleyerek [issue açın](https://github.com/VolkanCARBUGA/ekran-yansitici/issues/new).
+Tested in daily use on macOS. Windows support is new and has seen little testing on real hardware. If something goes wrong, [open an issue](https://github.com/VolkanCARBUGA/ekran-yansitici/issues/new) with your Windows version, display scaling and the contents of `server.log`.
 
-Planlananlar:
+Planned:
 
-- Wi-Fi bağlantısını HTTPS ile şifrelemek
-- Tablette ekran klavyesi
-- Linux desteği
+- Encrypting the Wi-Fi connection with HTTPS
+- An on-screen keyboard on the tablet
+- Linux support
 
-## Katkı
+## Contributing
 
-Issue ve pull request'ler açıktır. Platforma özel bir değişiklik yaparsanız iki platform dosyasının aynı fonksiyonları sağlamaya devam etmesi gerekir. Bu fonksiyonların listesi `app/platform_layer.py` dosyasının başında yazılıdır.
+Issues and pull requests are welcome. If you change something platform-specific, both platform files have to keep providing the same functions; the list is at the top of `app/platform_layer.py`.
 
-Geliştirirken sunucuyu servis yerine `./BASLAT.command` (veya `BASLAT.bat`) ile terminalde çalıştırmak hataları görmeyi kolaylaştırır.
+While developing, running the server in a terminal with `./BASLAT.command` (or `BASLAT.bat`) instead of as a service makes errors easier to see.
 
-## Lisans
+## License
 
 [MIT](LICENSE)
