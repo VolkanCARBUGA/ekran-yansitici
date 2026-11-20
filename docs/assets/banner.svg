@@ -1,0 +1,133 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="420" viewBox="0 0 1280 420" role="img" aria-labelledby="title desc">
+  <title id="title">Ekran Yansıtıcı</title>
+  <desc id="desc">Ekranı kırık bir dizüstü, USB kabloyla bağlı bir Android tablete görüntüsünü yansıtıyor.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0B1220"/>
+      <stop offset="0.55" stop-color="#0F172A"/>
+      <stop offset="1" stop-color="#0B2B2B"/>
+    </linearGradient>
+    <radialGradient id="glowTeal" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#14B8A6" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#14B8A6" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowAmber" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#F59E0B" stop-opacity="0.30"/>
+      <stop offset="1" stop-color="#F59E0B" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="wall" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0EA5A4"/>
+      <stop offset="0.6" stop-color="#2563EB"/>
+      <stop offset="1" stop-color="#F59E0B"/>
+    </linearGradient>
+    <linearGradient id="titleGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#99F6E4"/>
+    </linearGradient>
+    <pattern id="dots" width="22" height="22" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.2" fill="#FFFFFF" opacity="0.07"/>
+    </pattern>
+    <clipPath id="card"><rect width="1280" height="420" rx="28"/></clipPath>
+  </defs>
+
+  <g clip-path="url(#card)">
+    <rect width="1280" height="420" fill="url(#bg)"/>
+    <rect width="1280" height="420" fill="url(#dots)"/>
+    <circle cx="1110" cy="250" r="260" fill="url(#glowTeal)"/>
+    <circle cx="780" cy="90" r="170" fill="url(#glowAmber)"/>
+  </g>
+
+  <!-- Sol: metin -->
+  <g font-family="'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif">
+    <rect x="72" y="70" width="296" height="34" rx="17" fill="#14B8A6" fill-opacity="0.14" stroke="#14B8A6" stroke-opacity="0.5"/>
+    <circle cx="94" cy="87" r="5" fill="#2DD4BF">
+      <animate attributeName="opacity" values="1;0.35;1" dur="2.4s" repeatCount="indefinite"/>
+    </circle>
+    <text x="108" y="93" font-size="16" font-weight="600" fill="#99F6E4">Açık kaynak · macOS &amp; Windows</text>
+
+    <text x="70" y="178" font-size="68" font-weight="800" fill="url(#titleGrad)" letter-spacing="-1">Ekran Yansıtıcı</text>
+
+    <text x="72" y="226" font-size="24" fill="#CBD5E1">Ekranı kırık dizüstünüzü çöpe atmayın,</text>
+    <text x="72" y="260" font-size="24" fill="#CBD5E1">Android tabletinizi <tspan fill="#2DD4BF" font-weight="700">ana ekran</tspan> yapın.</text>
+
+    <g font-size="15" font-weight="600">
+      <rect x="72" y="312" width="166" height="36" rx="10" fill="#FFFFFF" fill-opacity="0.06" stroke="#FFFFFF" stroke-opacity="0.14"/>
+      <circle cx="92" cy="330" r="5" fill="#2DD4BF"/>
+      <text x="105" y="335" fill="#E2E8F0">USB tak-çalıştır</text>
+      <rect x="248" y="312" width="134" height="36" rx="10" fill="#FFFFFF" fill-opacity="0.06" stroke="#FFFFFF" stroke-opacity="0.14"/>
+      <circle cx="268" cy="330" r="5" fill="#60A5FA"/>
+      <text x="281" y="335" fill="#E2E8F0">Wi-Fi + PIN</text>
+      <rect x="392" y="312" width="132" height="36" rx="10" fill="#FFFFFF" fill-opacity="0.06" stroke="#FFFFFF" stroke-opacity="0.14"/>
+      <circle cx="412" cy="330" r="5" fill="#FBBF24"/>
+      <text x="425" y="335" fill="#E2E8F0">Dokunmatik</text>
+      <rect x="534" y="312" width="194" height="36" rx="10" fill="#FFFFFF" fill-opacity="0.06" stroke="#FFFFFF" stroke-opacity="0.14"/>
+      <circle cx="554" cy="330" r="5" fill="#FB7185"/>
+      <text x="567" y="335" fill="#E2E8F0">Otomatik ana ekran</text>
+    </g>
+  </g>
+
+  <!-- Sağ: kırık dizüstü -->
+  <g>
+    <rect x="740" y="96" width="290" height="186" rx="12" fill="#1F2937" stroke="#475569" stroke-width="2"/>
+    <rect x="752" y="108" width="266" height="162" rx="4" fill="#05070D"/>
+    <!-- çatlak -->
+    <g stroke="#FB7185" stroke-width="1.8" fill="none" stroke-linecap="round" opacity="0.9">
+      <path d="M868 176 L842 132 L830 110"/>
+      <path d="M868 176 L910 140 L948 118"/>
+      <path d="M868 176 L930 196 L1012 210"/>
+      <path d="M868 176 L880 228 L872 268"/>
+      <path d="M868 176 L818 206 L760 238"/>
+      <path d="M868 176 L806 160 L756 150"/>
+      <path d="M842 132 L870 128"/>
+      <path d="M930 196 L938 228"/>
+      <path d="M818 206 L826 240"/>
+    </g>
+    <circle cx="868" cy="176" r="6" fill="#FB7185" opacity="0.85"/>
+    <path d="M716 282 H1054 L1080 300 Q1082 306 1074 306 H696 Q688 306 690 300 Z" fill="#334155" stroke="#475569" stroke-width="2"/>
+    <rect x="850" y="285" width="70" height="6" rx="3" fill="#1E293B"/>
+  </g>
+
+  <!-- USB kablo: akan veri -->
+  <path d="M1066 298 C 1100 350, 1096 300, 1112 276" fill="none" stroke="#0F766E" stroke-width="7" stroke-linecap="round"/>
+  <path d="M1066 298 C 1100 350, 1096 300, 1112 276" fill="none" stroke="#5EEAD4" stroke-width="3" stroke-linecap="round" stroke-dasharray="6 10">
+    <animate attributeName="stroke-dashoffset" from="32" to="0" dur="0.8s" repeatCount="indefinite"/>
+  </path>
+
+  <!-- Sağ: tablet (ana ekran) -->
+  <g>
+    <rect x="1104" y="150" width="150" height="214" rx="16" transform="rotate(-8 1179 257)" fill="#0B1220" stroke="#5EEAD4" stroke-opacity="0.65" stroke-width="2.5"/>
+    <g transform="rotate(-8 1179 257)">
+      <rect x="1114" y="162" width="130" height="190" rx="8" fill="url(#wall)"/>
+      <rect x="1114" y="162" width="130" height="12" rx="4" fill="#F8FAFC" fill-opacity="0.85"/>
+      <rect x="1126" y="192" width="92" height="64" rx="6" fill="#0F172A" fill-opacity="0.75"/>
+      <rect x="1126" y="192" width="92" height="12" rx="4" fill="#1E293B"/>
+      <circle cx="1134" cy="198" r="2.4" fill="#FB7185"/>
+      <circle cx="1142" cy="198" r="2.4" fill="#FBBF24"/>
+      <circle cx="1150" cy="198" r="2.4" fill="#34D399"/>
+      <rect x="1134" y="214" width="56" height="5" rx="2.5" fill="#94A3B8"/>
+      <rect x="1134" y="226" width="72" height="5" rx="2.5" fill="#64748B"/>
+      <rect x="1134" y="238" width="40" height="5" rx="2.5" fill="#64748B"/>
+      <rect x="1128" y="326" width="102" height="18" rx="7" fill="#F8FAFC" fill-opacity="0.55"/>
+      <g fill="#0F172A" fill-opacity="0.75">
+        <rect x="1136" y="330" width="10" height="10" rx="3"/>
+        <rect x="1152" y="330" width="10" height="10" rx="3"/>
+        <rect x="1168" y="330" width="10" height="10" rx="3"/>
+        <rect x="1184" y="330" width="10" height="10" rx="3"/>
+        <rect x="1200" y="330" width="10" height="10" rx="3"/>
+      </g>
+      <!-- dokunma dalgası -->
+      <circle cx="1190" cy="290" r="6" fill="none" stroke="#FFFFFF" stroke-width="2">
+        <animate attributeName="r" values="4;20" dur="1.8s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.9;0" dur="1.8s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="1190" cy="290" r="4" fill="#FFFFFF" fill-opacity="0.9"/>
+    </g>
+  </g>
+
+  <!-- "Ana ekran" etiketi -->
+  <g font-family="'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif">
+    <rect x="1108" y="96" width="118" height="30" rx="15" fill="#14B8A6"/>
+    <text x="1167" y="116" text-anchor="middle" font-size="14" font-weight="700" fill="#042F2E">Ana ekran</text>
+    <path d="M1160 126 L1167 136 L1174 126 Z" fill="#14B8A6"/>
+  </g>
+</svg>
